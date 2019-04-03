@@ -1,6 +1,8 @@
 import logging
 import sys
 import traceback
+import warnings
+
 import pytest
 import pkg_resources
 
@@ -130,7 +132,6 @@ class PyTestServiceClass(with_metaclass(Singleton, object)):
         req_data = self.RP.start_launch(**sl_pt)
         log.debug('ReportPortal - Launch started: response_body=%s', req_data)
 
-
     def collect_tests(self, session):
         self._stop_if_necessary()
         if self.RP is None:
@@ -249,7 +250,6 @@ class PyTestServiceClass(with_metaclass(Singleton, object)):
             log.debug('ReportPortal - End TestSuite: request_body=%s', payload)
             self.RP.finish_test_item(**payload)
 
-
     def finish_launch(self, launch=None, status='rp_launch'):
         self._stop_if_necessary()
         if self.RP is None:
@@ -347,7 +347,8 @@ class PyTestServiceClass(with_metaclass(Singleton, object)):
                 if test_fullname in tests_parts:
                     item_test = tests_parts[test_fullname]
                 else:
-                    item_test = Item(test_fullname, nodeid=test_fullname, session=item.session, config=item.session.config)
+                    item_test = Item(test_fullname, nodeid=test_fullname, session=item.session,
+                                     config=item.session.config)
                     item_test._rp_name = rp_name
                     item_test.obj = item.obj
                     item_test.keywords = item.keywords
@@ -451,11 +452,8 @@ class PyTestServiceClass(with_metaclass(Singleton, object)):
         name = test_item._rp_name
         if len(name) > 256:
             name = name[:256]
-            test_item.warn(
-                'C1',
-                'Test node ID was truncated to "{}" because of name size '
-                'constrains on reportportal'.format(name)
-            )
+            warnings.warn(pytest.PytestWarning('Test node ID was truncated to "{}" because of name size '
+                                               'constrains on reportportal'.format(name)))
         return name
 
     @staticmethod

@@ -32,6 +32,16 @@ def pytest_configure_node(node):
     if node.config._reportportal_configured is False:
         # Stop now if the plugin is not properly configured
         return
+    if node.config.py_test_service.RP is None:
+        node.config.py_test_service.init_service(
+            project=node.config.getini('rp_project'),
+            endpoint=node.config.getini('rp_endpoint'),
+            uuid=node.config.getini('rp_uuid'),
+            log_batch_size=int(node.config.getini('rp_log_batch_size')),
+            ignore_errors=bool(node.config.getini('rp_ignore_errors')),
+            ignored_tags=node.config.getini('rp_ignore_tags'),
+            verify_ssl=node.config.getini('rp_verify_ssl')
+        )
     node.slaveinput['py_test_service'] = pickle.dumps(node.config.py_test_service)
 
 
